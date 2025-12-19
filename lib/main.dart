@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 
 import 'firebase_options.dart';
 import 'app_auth_provider.dart';
@@ -20,9 +19,6 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Don't initialize Functions here - let it be created after authentication
-  // This ensures the auth context is properly attached
-
   runApp(const MyApp());
 }
 
@@ -31,6 +27,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // MITE-inspired warm campus palette
+    const bg           = Color(0xFF121212);
+    const surface      = Color(0xFF1C1C1C);
+
+    const primary      = Color(0xFFFBC02D); // institute yellow
+    const secondary    = Color(0xFFFFA000); // amber
+    const errorRed     = Color(0xFFD32F2F); // institute red
+
+    const titleText    = Color(0xFFFFF3C0);
+    const bodyText     = Color(0xFFF5F5F5);
+    const subtleText   = Color(0xFFFFE082);
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppAuthProvider()),
@@ -38,41 +46,77 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: "Campus Queue System",
+        title: "In-Campus Queue System",
         themeMode: ThemeMode.dark,
         darkTheme: ThemeData(
           brightness: Brightness.dark,
           fontFamily: 'Inter',
-          scaffoldBackgroundColor: const Color(0xFF18171B),
-          cardColor: const Color(0xFF26232A),
-          canvasColor: const Color(0xFF26232A),
+          scaffoldBackgroundColor: bg,
+          cardColor: surface,
+          canvasColor: surface,
           appBarTheme: const AppBarTheme(
-            color: Color(0xFF26232A),
-            foregroundColor: Color(0xFFFFFFFF),
+            backgroundColor: surface,
+            foregroundColor: titleText,
             titleTextStyle: TextStyle(
               fontFamily: 'Montserrat',
               fontWeight: FontWeight.w700,
               fontSize: 20,
-              color: Colors.white,
+              color: titleText,
             ),
             elevation: 0,
           ),
-          colorScheme: ColorScheme.dark(
-            primary: Color(0xFFFFD84A), // custom yellow
-            secondary: Color(0xFFFF9800), // orange accent
-            error: Color(0xFFBF232A), // your red
-            background: Color(0xFF18171B),
-            surface: Color(0xFF26232A),
+          colorScheme: const ColorScheme.dark(
+            primary: primary,
+            secondary: secondary,
+            error: errorRed,
+            background: bg,
+            surface: surface,
           ),
-          textTheme: TextTheme(
-            displayLarge: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w900, color: Color(0xFFFFD84A)),
-            headlineLarge: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w700, color: Colors.white),
-            titleLarge: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w600, color: Color(0xFFFFD84A)),
-            bodyLarge: TextStyle(fontFamily: 'Inter', fontSize: 17, color: Colors.white, fontWeight: FontWeight.w400),
-            bodyMedium: TextStyle(fontFamily: 'Inter', fontSize: 15, color: Colors.white70, fontWeight: FontWeight.w400),
-            bodySmall: TextStyle(fontFamily: 'Inter', fontSize: 13, color: Color(0xFFFFD84A)),
-            labelLarge: TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w500, color: Color(0xFFFFD84A), fontSize: 14),
-            labelSmall: TextStyle(fontFamily: 'Inter', color: Color(0xFFBF232A), fontWeight: FontWeight.w400, fontSize: 12),
+          textTheme: const TextTheme(
+            displayLarge: TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.w900,
+              color: titleText,
+            ),
+            headlineLarge: TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.w700,
+              color: bodyText,
+            ),
+            titleLarge: TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.w600,
+              color: titleText,
+            ),
+            bodyLarge: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 17,
+              color: bodyText,
+              fontWeight: FontWeight.w400,
+            ),
+            bodyMedium: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 15,
+              color: Colors.white70,
+              fontWeight: FontWeight.w400,
+            ),
+            bodySmall: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 13,
+              color: subtleText,
+            ),
+            labelLarge: TextStyle(
+              fontFamily: 'Montserrat',
+              fontWeight: FontWeight.w500,
+              color: primary,
+              fontSize: 14,
+            ),
+            labelSmall: TextStyle(
+              fontFamily: 'Inter',
+              color: errorRed,
+              fontWeight: FontWeight.w400,
+              fontSize: 12,
+            ),
           ),
         ),
         home: const AuthWrapper(),
@@ -94,7 +138,7 @@ class AuthWrapper extends StatelessWidget {
         final user = snapshot.data!;
 
         return FutureBuilder(
-          future: user.getIdToken(true), // Always fresh
+          future: user.getIdToken(true),
           builder: (context, tokenSnap) {
             if (tokenSnap.connectionState != ConnectionState.done) {
               return const Scaffold(

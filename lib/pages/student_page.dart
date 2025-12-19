@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../app_auth_provider.dart';
 import '../queue_provider.dart';
 import 'student_qr_page.dart';
@@ -15,24 +14,31 @@ class StudentPage extends StatelessWidget {
     final auth = Provider.of<AppAuthProvider>(context);
     final email = auth.email ?? "";
 
-    // Dark red, dark yellow, orange color palette
-    const bg = Color(0xFF1A0A0A); // Very dark red-black background
-    const card = Color(0xFF2D1414); // Dark red card
-    const accent = Color(0xFFD97706); // Dark orange/amber accent
-    const accentRed = Color(0xFF991B1B); // Dark red
-    const accentYellow = Color(0xFFB45309); // Dark yellow/orange
+    // MITE-inspired warm campus palette
+    const bg           = Color(0xFF121212);
+    const card         = Color(0xFF1C1C1C);
+
+    const accent       = Color(0xFFFFA000); // amber
+    const accentRed    = Color(0xFFD32F2F); // institute red
+    const accentYellow = Color(0xFFFBC02D); // institute yellow
+
+    const titleText    = Color(0xFFFFF3C0);
+    const subtleText   = Color(0xFFFFE082);
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: card,
-        title: const Text("Student Dashboard"),
+        title: const Text(
+          "Student Dashboard",
+          style: TextStyle(color: titleText),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
               await auth.logout();
             },
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: accentYellow),
           ),
         ],
       ),
@@ -58,6 +64,7 @@ class StudentPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: card,
               borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: accentRed.withOpacity(0.25)),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -67,16 +74,16 @@ class StudentPage extends StatelessWidget {
                   final waiting = tokenSnap.data?.docs ?? [];
 
                   final alreadyWaiting = waiting.any(
-                    (d) =>
-                        (d.data() as Map<String, dynamic>)['email'] == email,
+                    (d) => (d.data() as Map<String, dynamic>)['email'] == email,
                   );
 
                   return StreamBuilder<DocumentSnapshot>(
                     stream: currentRef.snapshots(),
                     builder: (context, currentSnap) {
                       final snap = currentSnap.data;
-                      final currentData =
-                          snap != null ? snap.data() as Map<String, dynamic>? : null;
+                      final currentData = snap != null
+                          ? snap.data() as Map<String, dynamic>?
+                          : null;
 
                       final currentEmail = currentData?['email'] as String?;
                       final isCurrent = currentEmail == email;
@@ -86,18 +93,18 @@ class StudentPage extends StatelessWidget {
                         children: [
                           Text(
                             q.name,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontFamily: 'Montserrat',
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFFFFD84A),
+                              color: titleText,
                               fontSize: 20,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             "Waiting: ${waiting.length}",
-                            style: TextStyle(
-                              color: Colors.orange.shade300, // Light orange text
+                            style: const TextStyle(
+                              color: subtleText,
                               fontSize: 13,
                             ),
                           ),
@@ -107,8 +114,8 @@ class StudentPage extends StatelessWidget {
                               if (!alreadyWaiting && !isCurrent)
                                 FilledButton(
                                   style: FilledButton.styleFrom(
-                                    backgroundColor: accentYellow, // Dark yellow for booking
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: accentYellow,
+                                    foregroundColor: Colors.black,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(14),
                                     ),
@@ -116,35 +123,34 @@ class StudentPage extends StatelessWidget {
                                   onPressed: () async {
                                     try {
                                       await qp.bookToken(q.id);
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                              "Token booked for ${q.name}."),
+                                            "Token booked for ${q.name}.",
+                                          ),
                                         ),
                                       );
                                     } catch (e) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(e.toString()),
-                                        ),
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(e.toString())),
                                       );
                                     }
                                   },
                                   child: const Text("Book"),
                                 ),
-
                               if (alreadyWaiting && !isCurrent)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 10),
                                   decoration: BoxDecoration(
-                                    color: accentYellow.withOpacity(0.2),
+                                    color: accentYellow.withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: accentYellow, width: 1),
+                                    border: Border.all(
+                                      color: accentYellow,
+                                    ),
                                   ),
-                                  child: Text(
-                                    "Waiting...",
+                                  child: const Text(
+                                    "Waiting…",
                                     style: TextStyle(
                                       color: accentYellow,
                                       fontSize: 13,
@@ -152,12 +158,11 @@ class StudentPage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-
                               if (isCurrent)
                                 FilledButton(
                                   style: FilledButton.styleFrom(
-                                    backgroundColor: accent, // Orange for current
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: accent,
+                                    foregroundColor: Colors.black,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(14),
                                     ),

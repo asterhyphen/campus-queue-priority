@@ -15,35 +15,41 @@ class CashierPage extends StatelessWidget {
     final auth = Provider.of<AppAuthProvider>(context);
     final email = auth.email ?? "";
 
-    // Dark red, dark yellow, orange color palette
-    const bg = Color(0xFF1A0A0A); // Very dark red-black background
-    const card = Color(0xFF2D1414); // Dark red card
-    const accent = Color(0xFFD97706); // Dark orange/amber accent
-    const accentRed = Color(0xFF991B1B); // Dark red
-    const accentYellow = Color(0xFFB45309); // Dark yellow/orange
+    // MITE-inspired warm campus palette
+    const bg           = Color(0xFF121212);
+    const card         = Color(0xFF1C1C1C);
 
-    final myQueues =
-        qp.queues.where((q) => q.cashierEmail == email).toList();
+    const accent       = Color(0xFFFFA000); // amber
+    const accentRed    = Color(0xFFD32F2F); // institute red
+    const accentYellow = Color(0xFFFBC02D); // institute yellow
+
+    const titleText    = Color(0xFFFFF3C0);
+    const subtleText   = Color(0xFFBDBDBD);
+
+    final myQueues = qp.queues.where((q) => q.cashierEmail == email).toList();
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: card,
-        title: const Text("Cashier Dashboard"),
+        title: const Text(
+          "Cashier Dashboard",
+          style: TextStyle(color: titleText),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
               await auth.logout();
             },
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: accentYellow),
           ),
         ],
       ),
       body: myQueues.isEmpty
-          ? Center(
+          ? const Center(
               child: Text(
                 "No queues assigned to you.",
-                style: TextStyle(color: Colors.orange.shade300),
+                style: TextStyle(color: subtleText),
               ),
             )
           : ListView.builder(
@@ -51,6 +57,7 @@ class CashierPage extends StatelessWidget {
               itemCount: myQueues.length,
               itemBuilder: (context, i) {
                 final q = myQueues[i];
+
                 final tokensRef = FirebaseFirestore.instance
                     .collection('queues')
                     .doc(q.id)
@@ -68,6 +75,7 @@ class CashierPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: card,
                     borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: accentRed.withOpacity(0.25)),
                   ),
                   child: StreamBuilder<QuerySnapshot>(
                     stream: tokensRef.snapshots(),
@@ -82,32 +90,33 @@ class CashierPage extends StatelessWidget {
                               ? snap.data() as Map<String, dynamic>?
                               : null;
 
-                          final currentEmail = currentData?['email'];
+                          final currentEmail =
+                              currentData?['email'] as String?;
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 q.name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontFamily: 'Montserrat',
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFFFFD84A),
+                                  color: titleText,
                                   fontSize: 20,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 "Current: ${currentEmail ?? 'None'}",
-                                style: TextStyle(
-                                  color: Colors.grey.shade400,
+                                style: const TextStyle(
+                                  color: subtleText,
                                   fontSize: 13,
                                 ),
                               ),
                               Text(
                                 "Waiting: ${waiting.length}",
-                                style: TextStyle(
-                                  color: Colors.grey.shade400,
+                                style: const TextStyle(
+                                  color: subtleText,
                                   fontSize: 13,
                                 ),
                               ),
@@ -116,11 +125,10 @@ class CashierPage extends StatelessWidget {
                                 children: [
                                   FilledButton(
                                     style: FilledButton.styleFrom(
-                                      backgroundColor: accent, // Dark orange
-                                      foregroundColor: Colors.white,
+                                      backgroundColor: accent,
+                                      foregroundColor: Colors.black,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(14),
+                                        borderRadius: BorderRadius.circular(14),
                                       ),
                                     ),
                                     onPressed: () async {
@@ -129,7 +137,8 @@ class CashierPage extends StatelessWidget {
                                       } catch (e) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
-                                          SnackBar(content: Text(e.toString())),
+                                          SnackBar(
+                                              content: Text(e.toString())),
                                         );
                                       }
                                     },
@@ -138,11 +147,13 @@ class CashierPage extends StatelessWidget {
                                   const SizedBox(width: 10),
                                   OutlinedButton(
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: accentYellow, // Dark yellow
-                                      side: BorderSide(color: accentYellow, width: 1.5),
+                                      foregroundColor: accentYellow,
+                                      side: const BorderSide(
+                                        color: accentYellow,
+                                        width: 1.5,
+                                      ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(14),
+                                        borderRadius: BorderRadius.circular(14),
                                       ),
                                     ),
                                     onPressed: () {

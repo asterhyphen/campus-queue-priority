@@ -20,24 +20,33 @@ class _AdminPageState extends State<AdminPage> {
   Widget build(BuildContext context) {
     final qp = Provider.of<QueueProvider>(context);
     final auth = Provider.of<AppAuthProvider>(context, listen: false);
-    // Dark red, dark yellow, orange color palette
-    const bg = Color(0xFF1A0A0A); // Very dark red-black background
-    const card = Color(0xFF2D1414); // Dark red card
-    const accent = Color(0xFFD97706); // Dark orange/amber accent
-    const accentRed = Color(0xFF991B1B); // Dark red
-    const accentYellow = Color(0xFFB45309); // Dark yellow/orange
+
+    // MITE-inspired warm campus palette
+    const bg           = Color(0xFF121212);
+    const card         = Color(0xFF1C1C1C);
+
+    const accent       = Color(0xFFFFA000); // amber
+    const accentRed    = Color(0xFFD32F2F); // institute red
+    const accentYellow = Color(0xFFFBC02D); // institute yellow
+
+    const titleText    = Color(0xFFFFF3C0);
+    const subtleText   = Color(0xFFFFE082);
+    const fieldBg      = Color(0xFF1E1E1E);
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: card,
-        title: const Text("Admin • Queues"),
+        title: const Text(
+          "Admin • Queues",
+          style: TextStyle(color: titleText),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
               await auth.logout();
             },
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: accentYellow),
           ),
         ],
       ),
@@ -50,16 +59,17 @@ class _AdminPageState extends State<AdminPage> {
               decoration: BoxDecoration(
                 color: card,
                 borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: accentRed.withOpacity(0.25)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     "Create Queue",
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFFFD84A),
+                      color: titleText,
                       fontSize: 21,
                       letterSpacing: -0.5,
                     ),
@@ -70,20 +80,17 @@ class _AdminPageState extends State<AdminPage> {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: "Queue name (e.g. Canteen)",
-                      labelStyle: TextStyle(color: Colors.orange.shade200),
+                      labelStyle: const TextStyle(color: subtleText),
                       filled: true,
-                      fillColor: const Color(0xFF3D1F1F),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: accentRed.withOpacity(0.3)),
-                      ),
+                      fillColor: fieldBg,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: accentRed.withOpacity(0.3)),
+                        borderSide:
+                            BorderSide(color: accentRed.withOpacity(0.25)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: accent, width: 2),
+                        borderSide: const BorderSide(color: accent, width: 2),
                       ),
                     ),
                   ),
@@ -93,20 +100,17 @@ class _AdminPageState extends State<AdminPage> {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       labelText: "Cashier email",
-                      labelStyle: TextStyle(color: Colors.orange.shade200),
+                      labelStyle: const TextStyle(color: subtleText),
                       filled: true,
-                      fillColor: const Color(0xFF3D1F1F),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: accentRed.withOpacity(0.3)),
-                      ),
+                      fillColor: fieldBg,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: accentRed.withOpacity(0.3)),
+                        borderSide:
+                            BorderSide(color: accentRed.withOpacity(0.25)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: accent, width: 2),
+                        borderSide: const BorderSide(color: accent, width: 2),
                       ),
                     ),
                   ),
@@ -115,8 +119,8 @@ class _AdminPageState extends State<AdminPage> {
                     alignment: Alignment.centerRight,
                     child: FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: accent, // Dark orange
-                        foregroundColor: Colors.white,
+                        backgroundColor: accent,
+                        foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -125,50 +129,37 @@ class _AdminPageState extends State<AdminPage> {
                         final name = nameCtrl.text.trim();
                         final cashier = cashierCtrl.text.trim();
                         if (name.isEmpty || cashier.isEmpty) return;
-                        
-                        // Show debug info
+
                         final user = FirebaseAuth.instance.currentUser;
-                        String debugInfo = 'User: ${user?.email ?? "null"}\n';
-                        debugInfo += 'UID: ${user?.uid ?? "null"}\n';
-                        
+                        String debugInfo =
+                            'User: ${user?.email ?? "null"}\nUID: ${user?.uid ?? "null"}\n';
+
                         try {
-                          // Get token for debugging
                           final token = await user?.getIdToken(true);
-                          debugInfo += 'Token: ${token != null ? "${token.substring(0, 20)}..." : "null"}\n';
-                          debugInfo += 'Calling createQueue...\n';
-                          
+                          debugInfo +=
+                              'Token: ${token != null ? "${token.substring(0, 20)}..." : "null"}\n';
+
                           await qp.createQueue(name, cashier);
                           nameCtrl.clear();
                           cashierCtrl.clear();
+
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text("Queue created successfully!"),
-                                  const SizedBox(height: 4),
-                                  Text(debugInfo, style: const TextStyle(fontSize: 10)),
-                                ],
+                              content: Text(
+                                "Queue created successfully",
+                                style: const TextStyle(color: Colors.black),
                               ),
-                              duration: const Duration(seconds: 5),
+                              backgroundColor: accentYellow,
                             ),
                           );
-                        } catch (e, stackTrace) {
-                          debugInfo += 'ERROR: $e\n';
+                        } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Error: ${e.toString()}', style: const TextStyle(fontFamily: 'Montserrat', fontWeight: FontWeight.w700, color: Color(0xFFBF232A))),
-                                  const SizedBox(height: 4),
-                                  Text(debugInfo, style: const TextStyle(fontSize: 10)),
-                                ],
+                              backgroundColor: accentRed,
+                              content: Text(
+                                e.toString(),
+                                style: const TextStyle(color: Colors.white),
                               ),
-                              backgroundColor: Color(0xFFBF232A), // Dark red for errors
-                              duration: const Duration(seconds: 10),
                             ),
                           );
                         }
@@ -191,6 +182,7 @@ class _AdminPageState extends State<AdminPage> {
                     decoration: BoxDecoration(
                       color: card,
                       borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: accentRed.withOpacity(0.2)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,14 +193,14 @@ class _AdminPageState extends State<AdminPage> {
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'Inter',
-                            color: Colors.white,
+                            color: titleText,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           "Cashier: ${q.cashierEmail}",
-                          style: TextStyle(
-                            color: Colors.orange.shade300, // Light orange text
+                          style: const TextStyle(
+                            color: subtleText,
                             fontSize: 13,
                             fontFamily: 'Inter',
                           ),

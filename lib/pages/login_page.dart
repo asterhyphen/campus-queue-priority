@@ -19,12 +19,20 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final auth = Provider.of<AppAuthProvider>(context);
 
-    // Dark red, dark yellow, orange color palette
-    const accent = Color(0xFFD97706); // Dark orange/amber accent
-    const accentRed = Color(0xFF991B1B); // Dark red
-    const accentYellow = Color(0xFFB45309); // Dark yellow/orange
-    const bg = Color(0xFF1A0A0A); // Very dark red-black background
-    const card = Color(0xFF2D1414); // Dark red card
+    // MITE-inspired warm campus palette
+    const bg           = Color(0xFF121212);
+    const card         = Color(0xFF1C1C1C);
+
+    const accent       = Color(0xFFFFA000); // amber CTA
+    const accentRed    = Color(0xFFD32F2F); // institute red
+    const accentYellow = Color(0xFFFBC02D); // institute yellow
+
+    const titleText    = Color(0xFFFFF3C0);
+    const subtitleText = Color(0xFFFFA000);
+
+    const fieldBg      = Color(0xFF1E1E1E);
+    const fieldText    = Color(0xFFF5F5F5);
+    const labelText    = Color(0xFFFFE082);
 
     return Scaffold(
       backgroundColor: bg,
@@ -37,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
             decoration: BoxDecoration(
               color: card,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: accentRed.withOpacity(0.3), width: 1),
+              border: Border.all(color: accentRed.withOpacity(0.25)),
               boxShadow: const [
                 BoxShadow(
                   blurRadius: 20,
@@ -49,25 +57,23 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Title
                 Text(
-                  "Campus Queue",
-                  style: TextStyle(
+                  "ICQS Login",
+                  style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFFFFD84A),
+                    color: titleText,
                     fontSize: 30,
                     letterSpacing: -1,
                   ),
                 ),
                 const SizedBox(height: 8),
-                // Subheading
                 Text(
                   "Sign in to continue",
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFFFF9800),
+                    color: subtitleText,
                     fontSize: 17,
                   ),
                 ),
@@ -77,10 +83,12 @@ class _LoginPageState extends State<LoginPage> {
                 TextField(
                   controller: emailCtrl,
                   keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: fieldText),
                   decoration: InputDecoration(
                     labelText: "Email",
+                    labelStyle: const TextStyle(color: labelText),
                     filled: true,
-                    fillColor: const Color(0xFF1F2230),
+                    fillColor: fieldBg,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide.none,
@@ -94,23 +102,20 @@ class _LoginPageState extends State<LoginPage> {
                 TextField(
                   controller: passCtrl,
                   obscureText: true,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: fieldText),
                   decoration: InputDecoration(
                     labelText: "Password",
-                    labelStyle: TextStyle(color: Colors.orange.shade200),
+                    labelStyle: const TextStyle(color: labelText),
                     filled: true,
-                    fillColor: const Color(0xFF3D1F1F),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: accentRed.withOpacity(0.3)),
-                    ),
+                    fillColor: fieldBg,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: accentRed.withOpacity(0.3)),
+                      borderSide:
+                          BorderSide(color: accentRed.withOpacity(0.25)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: accent, width: 2),
+                      borderSide: const BorderSide(color: accent, width: 2),
                     ),
                   ),
                 ),
@@ -122,18 +127,16 @@ class _LoginPageState extends State<LoginPage> {
                 if (!loading)
                   Column(
                     children: [
-                      // LOGIN BUTTON
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            backgroundColor: accent, // Dark orange
-                            foregroundColor: Colors.white,
+                            backgroundColor: accent,
+                            foregroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 14, horizontal: 20),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
                           onPressed: () async {
                             setState(() => loading = true);
@@ -154,21 +157,18 @@ class _LoginPageState extends State<LoginPage> {
                           child: const Text("Login"),
                         ),
                       ),
-
                       const SizedBox(height: 10),
-
-                      // REGISTER BUTTON
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: accentYellow, // Dark yellow
-                            side: BorderSide(color: accentYellow, width: 1.5),
+                            foregroundColor: accentYellow,
+                            side: const BorderSide(
+                                color: accentYellow, width: 1.5),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 20),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           onPressed: () async {
                             setState(() => loading = true);
@@ -180,8 +180,8 @@ class _LoginPageState extends State<LoginPage> {
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content:
-                                          Text("Registered. Now login.")),
+                                    content: Text("Registered. Now login."),
+                                  ),
                                 );
                               }
                             } catch (e) {
@@ -196,10 +196,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: const Text("Register"),
                         ),
                       ),
-
                       const SizedBox(height: 14),
-
-                      // GOOGLE LOGIN
                       TextButton(
                         onPressed: () async {
                           setState(() => loading = true);
@@ -214,7 +211,10 @@ class _LoginPageState extends State<LoginPage> {
                           }
                           if (mounted) setState(() => loading = false);
                         },
-                        child: const Text("Sign in with Google"),
+                        child: const Text(
+                          "Sign in with Google",
+                          style: TextStyle(color: accentYellow),
+                        ),
                       ),
                     ],
                   ),
