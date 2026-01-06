@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "tokens",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "priority", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

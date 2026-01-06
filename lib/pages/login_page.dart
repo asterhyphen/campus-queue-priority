@@ -20,19 +20,19 @@ class _LoginPageState extends State<LoginPage> {
     final auth = Provider.of<AppAuthProvider>(context);
 
     // MITE-inspired warm campus palette
-    const bg           = Color(0xFF121212);
-    const card         = Color(0xFF1C1C1C);
+    const bg = Color(0xFF121212);
+    const card = Color(0xFF1C1C1C);
 
-    const accent       = Color(0xFFFFA000); // amber CTA
-    const accentRed    = Color(0xFFD32F2F); // institute red
+    const accent = Color(0xFFFFA000); // amber CTA
+    const accentRed = Color(0xFFD32F2F); // institute red
     const accentYellow = Color(0xFFFBC02D); // institute yellow
 
-    const titleText    = Color(0xFFFFF3C0);
+    const titleText = Color(0xFFFFF3C0);
     const subtitleText = Color(0xFFFFA000);
 
-    const fieldBg      = Color(0xFF1E1E1E);
-    const fieldText    = Color(0xFFF5F5F5);
-    const labelText    = Color(0xFFFFE082);
+    const fieldBg = Color(0xFF1E1E1E);
+    const fieldText = Color(0xFFF5F5F5);
+    const labelText = Color(0xFFFFE082);
 
     return Scaffold(
       backgroundColor: bg,
@@ -180,7 +180,8 @@ class _LoginPageState extends State<LoginPage> {
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text("Registered. Now login."),
+                                    content: Text(
+                                        "Registered. Verification email sent. Please verify and then log in."),
                                   ),
                                 );
                               }
@@ -196,7 +197,42 @@ class _LoginPageState extends State<LoginPage> {
                           child: const Text("Register"),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 10),
+                      TextButton(
+                        onPressed: () async {
+                          if (emailCtrl.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Enter your college email first.')),
+                            );
+                            return;
+                          }
+                          setState(() => loading = true);
+                          try {
+                            await auth.sendPasswordReset(emailCtrl.text.trim());
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Password reset email sent.')),
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            }
+                          }
+                          if (mounted) setState(() => loading = false);
+                        },
+                        child: const Text(
+                          "Forgot password?",
+                          style: TextStyle(color: accentYellow),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                       TextButton(
                         onPressed: () async {
                           setState(() => loading = true);

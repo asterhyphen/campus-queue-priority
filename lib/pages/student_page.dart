@@ -5,8 +5,15 @@ import '../app_auth_provider.dart';
 import '../queue_provider.dart';
 import 'student_qr_page.dart';
 
-class StudentPage extends StatelessWidget {
+class StudentPage extends StatefulWidget {
   const StudentPage({super.key});
+
+  @override
+  State<StudentPage> createState() => _StudentPageState();
+}
+
+class _StudentPageState extends State<StudentPage> {
+  final Set<String> _booking = {};
 
   @override
   Widget build(BuildContext context) {
@@ -15,15 +22,15 @@ class StudentPage extends StatelessWidget {
     final email = auth.email ?? "";
 
     // MITE-inspired warm campus palette
-    const bg           = Color(0xFF121212);
-    const card         = Color(0xFF1C1C1C);
+    const bg = Color(0xFF121212);
+    const card = Color(0xFF1C1C1C);
 
-    const accent       = Color(0xFFFFA000); // amber
-    const accentRed    = Color(0xFFD32F2F); // institute red
+    const accent = Color(0xFFFFA000); // amber
+    const accentRed = Color(0xFFD32F2F); // institute red
     const accentYellow = Color(0xFFFBC02D); // institute yellow
 
-    const titleText    = Color(0xFFFFF3C0);
-    const subtleText   = Color(0xFFFFE082);
+    const titleText = Color(0xFFFFF3C0);
+    const subtleText = Color(0xFFFFE082);
 
     return Scaffold(
       backgroundColor: bg,
@@ -91,14 +98,20 @@ class StudentPage extends StatelessWidget {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            q.name,
-                            style: const TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.w700,
-                              color: titleText,
-                              fontSize: 20,
-                            ),
+                          Row(
+                            children: [
+                              const Icon(Icons.queue, color: Colors.white24),
+                              const SizedBox(width: 8),
+                              Text(
+                                q.name,
+                                style: const TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  fontWeight: FontWeight.w700,
+                                  color: titleText,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -120,23 +133,47 @@ class StudentPage extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(14),
                                     ),
                                   ),
-                                  onPressed: () async {
-                                    try {
-                                      await qp.bookToken(q.id);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            "Token booked for ${q.name}.",
-                                          ),
-                                        ),
-                                      );
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(e.toString())),
-                                      );
-                                    }
-                                  },
-                                  child: const Text("Book"),
+                                  onPressed: _booking.contains(q.id)
+                                      ? null
+                                      : () async {
+                                          setState(() => _booking.add(q.id));
+                                          try {
+                                            await qp.bookToken(q.id);
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  "Token booked for ${q.name}.",
+                                                ),
+                                              ),
+                                            );
+                                          } catch (e) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(e.toString())),
+                                            );
+                                          }
+                                          if (mounted)
+                                            setState(
+                                                () => _booking.remove(q.id));
+                                        },
+                                  child: _booking.contains(q.id)
+                                      ? Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: const [
+                                            SizedBox(
+                                              width: 14,
+                                              height: 14,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            ),
+                                            SizedBox(width: 8),
+                                            Text('Booking...'),
+                                          ],
+                                        )
+                                      : const Text("Book"),
                                 ),
                               if (alreadyWaiting && !isCurrent)
                                 Container(
